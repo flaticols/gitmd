@@ -4,384 +4,400 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="gitmd — a small Go CLI for managing git commit trailers. Reference manual.">
-<title>gitmd · Field Manual № 01</title>
+<meta name="description" content="gitmd — a small Go CLI for managing git commit trailers. Documentation.">
+<meta name="theme-color" content="#f6f0e6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1815" media="(prefers-color-scheme: dark)">
+<title>gitmd — Documentation</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,0..100&family=Newsreader:opsz,wght@6..72,300..600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-/* ───────── cascade layers ───────── */
-@layer reset, tokens, base, pattern, layout, doc, ui, util;
+/* ─────── cascade layers ─────── */
+@layer reset, tokens, base, surface, layout, doc, ui, util;
 
 @layer reset {
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
   body { min-block-size: 100dvb; }
   img, svg { display: block; max-inline-size: 100%; }
-  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
   a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
   :focus-visible {
-    outline: 2px solid var(--rust);
-    outline-offset: 3px;
-    border-radius: 2px;
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
   }
 }
 
-/* ───────── design tokens ───────── */
+/* ─────── tokens ─────── */
 @layer tokens {
   :root {
-    /* WARM PAPER PALETTE — deliberately not blue */
-    --paper:        light-dark(#f3e8d0, #1c140f);
-    --paper-soft:   light-dark(#ecdfc0, #251c15);
-    --paper-edge:   light-dark(#e0d2af, #2e2218);
-    --ink:          light-dark(#2a1a10, #ecd9b0);
-    --ink-soft:     light-dark(#5a3e2b, #b89878);
-    --rust:         light-dark(#a8401b, #e07a3f);
-    --burgundy:     light-dark(#7a2424, #c64a4a);
-    --mustard:      light-dark(#b88322, #e5ba4a);
-    --olive:        light-dark(#5d5b1f, #b3aa48);
-    --rule:         light-dark(#3a2618, #6e553c);
-    --rule-soft:    color-mix(in oklab, var(--rule) 22%, transparent);
-    --shadow:       light-dark(rgba(60,30,12,.18), rgba(0,0,0,.55));
-    --halftone:     light-dark(#8b6a3a, #6a4a26);
+    --bg:        light-dark(#f6f0e6, #1c1815);
+    --bg-tint:   light-dark(#ede5d5, #25201a);
+    --bg-soft:   light-dark(#f0e9dc, #211c17);
+    --ink:       light-dark(#2d2823, #ece4d6);
+    --ink-2:     light-dark(#6b5e52, #b3a795);
+    --ink-3:     light-dark(#9b8d7e, #786d5f);
+    --accent:    light-dark(#b87560, #d49075);          /* warm clay */
+    --accent-2:  light-dark(#7d8f72, #a8b59d);          /* sage */
+    --accent-3:  light-dark(#c4a36a, #d6b97a);          /* faded gold */
+    --rule:      light-dark(rgba(45,40,35,.10), rgba(236,228,214,.10));
+    --rule-2:    light-dark(rgba(45,40,35,.18), rgba(236,228,214,.18));
+    --select:    light-dark(#f0d6c0, #4a342a);
 
-    --serif:    "Fraunces", ui-serif, Georgia, serif;
-    --body:     "EB Garamond", ui-serif, "Iowan Old Style", Georgia, serif;
-    --mono:     "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --display:   "Fraunces", ui-serif, Georgia, serif;
+    --serif:     "Newsreader", ui-serif, "Iowan Old Style", Georgia, serif;
+    --mono:      "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-    --max:      78rem;
-    --gutter:   clamp(1.25rem, 2.4vw, 2.5rem);
+    --max:       72rem;
+    --gutter:    clamp(1.25rem, 2vw + 0.6rem, 2.5rem);
+    --radius:    10px;
+    --radius-sm: 6px;
 
     color-scheme: light dark;
   }
 }
 
-/* ───────── base typography ───────── */
+/* ─────── base typography ─────── */
 @layer base {
   body {
-    font-family: var(--body);
-    font-size: clamp(1.02rem, .9rem + .35vw, 1.18rem);
-    line-height: 1.55;
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    font-size: clamp(1.02rem, 0.9rem + 0.35vw, 1.13rem);
+    line-height: 1.65;
     color: var(--ink);
-    background: var(--paper);
-    font-feature-settings: "kern", "liga", "onum", "pnum";
+    background: var(--bg);
     text-wrap: pretty;
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "liga", "onum";
   }
+
   h1, h2, h3, h4 {
-    font-family: var(--serif);
-    font-variation-settings: "SOFT" 50, "opsz" 144;
+    font-family: var(--display);
+    font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 400;
     color: var(--ink);
     text-wrap: balance;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-    /* trims line-box to actual cap height for tight composition */
+    line-height: 1.08;
+    letter-spacing: -0.02em;
     text-box: trim-both cap alphabetic;
   }
-  h2 { font-size: clamp(1.7rem, 1.2rem + 1.6vw, 2.6rem); font-weight: 600; }
-  h3 { font-size: clamp(1.25rem, 1.05rem + .6vw, 1.55rem); font-weight: 550; }
-  h4 { font-size: 1.05rem; font-weight: 600; font-family: var(--mono); letter-spacing: .04em; text-transform: uppercase; }
-  p  { hanging-punctuation: first last; max-inline-size: 64ch; }
+  h2 {
+    font-size: clamp(1.85rem, 1.4rem + 1.6vw, 2.6rem);
+    font-variation-settings: "opsz" 144, "SOFT" 40, "wght" 350;
+  }
+  h3 {
+    font-size: clamp(1.2rem, 1.05rem + 0.5vw, 1.4rem);
+    font-variation-settings: "opsz" 36, "SOFT" 60, "wght" 450;
+    letter-spacing: -0.012em;
+  }
+  h4 {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+
+  p { hanging-punctuation: first last; max-inline-size: 64ch; }
   strong { font-weight: 600; color: var(--ink); }
-  em { font-style: italic; color: var(--burgundy); }
+  em { font-style: italic; color: var(--ink-2); }
+
   code, kbd, samp {
     font-family: var(--mono);
-    font-size: .88em;
-    background: color-mix(in oklab, var(--paper-soft) 75%, var(--rust) 6%);
-    padding: .08em .35em;
-    border-radius: 2px;
-    border: 1px solid var(--rule-soft);
+    font-size: 0.86em;
+    background: var(--bg-tint);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    color: var(--ink);
   }
-  ::selection { background: var(--mustard); color: #1a0f08; }
+
+  ::selection { background: var(--select); color: var(--ink); }
 }
 
-/* ───────── decorative SVG pattern ───────── */
-@layer pattern {
-  .vellum {
+/* ─────── background surface (svg pattern) ─────── */
+@layer surface {
+  .surface {
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    /* layered: halftone dot grid + diagonal lines + warm vignette */
+    /* very faint stipple + soft warm radial glow */
     background:
-      radial-gradient(ellipse at 50% 0%, transparent 40%, var(--shadow) 110%),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='2' cy='2' r='1' fill='%23000' opacity='.18'/><circle cx='16' cy='16' r='.6' fill='%23000' opacity='.10'/></svg>"),
-      repeating-linear-gradient(135deg,
-        transparent 0 22px,
-        color-mix(in oklab, var(--halftone) 35%, transparent) 22px 23px);
-    background-blend-mode: normal, multiply, normal;
+      radial-gradient(60rem 40rem at 80% -10%,
+        color-mix(in oklab, var(--accent-3) 18%, transparent), transparent 70%),
+      radial-gradient(50rem 40rem at -10% 100%,
+        color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 42 42'><circle cx='1' cy='1' r='0.7' fill='%23000' opacity='.07'/><circle cx='21' cy='21' r='0.5' fill='%23000' opacity='.05'/></svg>"),
+      var(--bg);
+    background-blend-mode: normal, normal, multiply, normal;
   }
-  /* big decorative shapes — bauhaus stamps in the margins */
-  .stamp {
+
+  /* one subtle decorative arc, top-right of the page */
+  .ornament {
     position: fixed;
+    top: -8rem;
+    right: -8rem;
+    inline-size: 30rem;
+    block-size: 30rem;
     pointer-events: none;
     z-index: -1;
-    color: var(--rust);
-    opacity: .55;
-    mix-blend-mode: multiply;
+    color: var(--accent);
+    opacity: 0.10;
   }
   @media (prefers-color-scheme: dark) {
-    .stamp { mix-blend-mode: screen; opacity: .22; }
+    .ornament { opacity: 0.18; }
   }
-  .stamp.s1 { top: 7vh; right: -3vw; inline-size: min(24vw, 280px); rotate: 12deg; }
-  .stamp.s2 { bottom: 4vh; left: -2vw; inline-size: min(18vw, 220px); rotate: -8deg; color: var(--burgundy); }
-  .stamp.s3 { top: 42vh; left: 38vw; inline-size: 90px; opacity: .35; color: var(--mustard); }
-  @media (max-width: 760px) {
-    .stamp.s1, .stamp.s3 { display: none; }
+  @media (max-width: 720px) {
+    .ornament { inline-size: 18rem; block-size: 18rem; top: -5rem; right: -6rem; }
   }
 }
 
-/* ───────── overall layout ───────── */
+/* ─────── layout ─────── */
 @layer layout {
   body { padding-inline: var(--gutter); }
   .shell { max-inline-size: var(--max); margin-inline: auto; }
 
   /* MASTHEAD */
   .masthead {
+    padding-block: clamp(2.5rem, 5vw, 5rem) 2rem;
     display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    gap: 1rem;
-    padding-block: 2rem 1rem;
-    border-block-end: 2px solid var(--rule);
-    position: relative;
+    gap: 1.5rem;
+    border-block-end: 1px solid var(--rule);
   }
-  .masthead::after {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    inset-block-end: -7px;
-    block-size: 1px;
-    background: var(--rule);
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
   .wordmark {
-    font-family: var(--serif);
-    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 700;
-    font-size: clamp(3.5rem, 4rem + 6vw, 9rem);
-    line-height: .82;
-    letter-spacing: -0.045em;
+    font-family: var(--display);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 350;
+    font-style: italic;
+    font-size: clamp(3rem, 2rem + 4vw, 5.5rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
     color: var(--ink);
     text-box: trim-both cap alphabetic;
   }
-  .wordmark .amp {
-    font-style: italic;
-    color: var(--rust);
-    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 400;
+  .wordmark .dot {
+    display: inline-block;
+    inline-size: 0.45em;
+    block-size: 0.45em;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-inline: 0.05em 0.04em;
+    translate: 0 -0.05em;
   }
-  .colophon {
+  .badge {
     font-family: var(--mono);
-    font-size: .72rem;
-    text-align: end;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    line-height: 1.7;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
   }
-  .colophon b { color: var(--burgundy); font-weight: 500; }
-
-  .deck {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: .25rem 2rem;
-    padding-block: 1rem 1.5rem;
-    border-block-end: 1px solid var(--rule);
+  .lede {
     font-family: var(--serif);
-    font-style: italic;
-    font-size: clamp(1.1rem, .9rem + .8vw, 1.4rem);
-    color: var(--ink-soft);
-    max-inline-size: 56ch;
+    font-size: clamp(1.15rem, 0.95rem + 0.7vw, 1.4rem);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-inline-size: 52ch;
+    text-wrap: balance;
   }
-  @container style(--w-md: 1) {} /* placeholder to silence linters */
+  .lede em { color: var(--accent); font-style: italic; }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    padding-block-start: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+  }
+  .meta dt { display: inline; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.12em; }
+  .meta dd { display: inline; color: var(--ink-2); margin-inline-start: 0.5rem; }
+  .meta div + div { padding-inline-start: 1.25rem; border-inline-start: 1px solid var(--rule); }
+  @media (max-width: 600px) {
+    .meta div + div { padding-inline-start: 0; border-inline-start: 0; }
+  }
 
   /* DOC GRID */
   .doc {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 2.25rem;
-    padding-block: 2.25rem 4rem;
+    gap: 2.5rem;
+    padding-block: 3rem 5rem;
   }
   @media (min-width: 980px) {
     .doc {
-      grid-template-columns: 18rem minmax(0, 1fr);
-      gap: 3rem;
+      grid-template-columns: 16rem minmax(0, 1fr);
+      gap: 4rem;
       align-items: start;
     }
-    .toc-wrap { position: sticky; top: 1.5rem; }
+    .toc-wrap { position: sticky; top: 2rem; max-block-size: calc(100dvh - 4rem); overflow-y: auto; }
   }
 
-  /* footer */
-  .pressmark {
-    border-block-start: 2px solid var(--rule);
-    padding-block: 1.5rem 2.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
+  /* FOOTER */
+  .pagefoot {
+    border-block-start: 1px solid var(--rule);
+    padding-block: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 1rem;
     font-family: var(--mono);
-    font-size: .72rem;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    color: var(--ink-soft);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
   }
+  .pagefoot a { color: var(--ink-2); }
+  .pagefoot a:hover { color: var(--accent); }
 }
 
-/* ───────── document content (scoped) ───────── */
+/* ─────── document content (scoped) ─────── */
 @layer doc {
-  /* @scope keeps these styles from leaking into UI chrome */
   @scope (.prose) {
-    :scope > * + * { margin-block-start: 1rem; }
-    :scope > h2 { margin-block-start: 2.6rem; }
-    :scope > h3 { margin-block-start: 1.6rem; }
-
-    h2 {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: baseline;
-      gap: .9rem;
-      font-variation-settings: "opsz" 144, "SOFT" 80, "wght" 600;
+    :scope > section + section { margin-block-start: 4.5rem; }
+    :scope h2 { margin-block-end: 1.25rem; }
+    :scope h3 {
+      margin-block-start: 2rem;
+      margin-block-end: 0.75rem;
+      color: var(--ink);
     }
-    h2::before {
-      content: "§ " counter(chapter, decimal-leading-zero);
-      counter-increment: chapter;
-      font-family: var(--mono);
-      font-size: .55em;
-      letter-spacing: .15em;
-      color: var(--rust);
-      text-transform: uppercase;
-      align-self: center;
-      padding-block: .35em .25em;
-      padding-inline: .55em;
-      border: 1px solid var(--rust);
-      border-radius: 2px;
-    }
-    h2::after {
-      content: "";
-      block-size: 1px;
-      background: var(--rule-soft);
-      align-self: end;
-      margin-block-end: .55em;
-    }
+    :scope p + p { margin-block-start: 1rem; }
+    :scope p { text-wrap: pretty; }
 
-    /* drop cap on first paragraph of each section */
-    h2 + p::first-letter {
-      font-family: var(--serif);
-      font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 800;
-      initial-letter: 3 2;
-      color: var(--rust);
-      margin-inline-end: .35rem;
-      font-style: normal;
-    }
-
-    p { text-wrap: pretty; }
-
-    a {
-      color: var(--rust);
+    :scope a {
+      color: var(--accent);
       text-decoration: underline;
       text-decoration-thickness: 1px;
-      text-underline-offset: .18em;
-      text-decoration-color: color-mix(in oklab, var(--rust) 40%, transparent);
-      transition: text-decoration-color .2s, color .2s;
+      text-underline-offset: 0.2em;
+      text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
+      transition: color 0.15s, text-decoration-color 0.15s;
     }
-    a:hover {
-      text-decoration-color: var(--rust);
-      color: var(--burgundy);
+    :scope a:hover {
+      color: var(--ink);
+      text-decoration-color: var(--accent);
+    }
+
+    /* small section eyebrow */
+    :scope .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-block-end: 0.5rem;
+      display: block;
     }
   }
 }
 
-/* ───────── components ───────── */
+/* ─────── components ─────── */
 @layer ui {
   /* SKIP LINK */
   .skip {
     position: absolute;
-    inset-inline-start: 1rem;
+    inset-inline-start: var(--gutter);
     inset-block-start: -3rem;
-    padding: .5rem .9rem;
+    padding: 0.55rem 0.95rem;
     background: var(--ink);
-    color: var(--paper);
+    color: var(--bg);
     font-family: var(--mono);
-    font-size: .8rem;
+    font-size: 0.78rem;
+    border-radius: var(--radius-sm);
     z-index: 100;
-    transition: inset-block-start .2s;
+    transition: inset-block-start 0.2s;
   }
   .skip:focus { inset-block-start: 1rem; }
 
-  /* TABLE OF CONTENTS */
-  .toc {
-    font-family: var(--mono);
-    font-size: .82rem;
-    line-height: 1.5;
-    border: 1px solid var(--rule);
-    background: color-mix(in oklab, var(--paper) 92%, var(--mustard) 4%);
-    padding: 1.1rem 1.2rem 1.3rem;
-    box-shadow: 4px 4px 0 var(--rule);
-  }
+  /* TOC */
+  .toc { font-family: var(--mono); font-size: 0.82rem; line-height: 1.7; }
   .toc h2 {
     font-family: var(--mono);
-    font-size: .7rem;
-    font-weight: 600;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    letter-spacing: .18em;
-    color: var(--rust);
-    margin-block-end: .9rem;
-    padding-block-end: .55rem;
-    border-block-end: 1px dashed var(--rule);
+    color: var(--ink-3);
+    margin-block-end: 1rem;
+    padding-block-end: 0.7rem;
+    border-block-end: 1px solid var(--rule);
+    text-box: auto;
   }
-  .toc ol { list-style: none; counter-reset: toc; display: grid; gap: .35rem; }
+  .toc ol { list-style: none; display: grid; gap: 0.1rem; counter-reset: toc; }
   .toc li { counter-increment: toc; }
   .toc a {
     display: grid;
-    grid-template-columns: 1.5rem 1fr;
-    gap: .5rem;
-    padding-block: .15rem;
-    text-decoration: none;
+    grid-template-columns: 1.8rem 1fr;
+    gap: 0.4rem;
+    padding-block: 0.35rem;
+    color: var(--ink-2);
+    border-radius: var(--radius-sm);
+    transition: color 0.15s;
   }
   .toc a::before {
     content: counter(toc, decimal-leading-zero);
-    color: var(--ink-soft);
-    font-size: .7rem;
+    color: var(--ink-3);
+    font-size: 0.7rem;
     align-self: center;
+    transition: color 0.15s;
   }
-  .toc a:hover { color: var(--rust); }
+  .toc a:hover { color: var(--accent); }
+  .toc a:hover::before { color: var(--accent); }
   .toc a[aria-current="true"] {
-    color: var(--burgundy);
-    font-weight: 600;
+    color: var(--ink);
+    font-weight: 500;
   }
-  .toc a[aria-current="true"]::before { color: var(--burgundy); }
+  .toc a[aria-current="true"]::before { color: var(--accent); }
 
-  /* COMMAND TABLE — uses subgrid */
+  /* COMMAND TABLE — subgrid */
   .cmdtable {
     display: grid;
-    grid-template-columns: minmax(8rem, max-content) 1fr;
-    gap: 0;
+    grid-template-columns: minmax(8rem, 14rem) 1fr;
     margin-block: 1.5rem;
     border: 1px solid var(--rule);
-    background: var(--paper-soft);
-    box-shadow: 5px 5px 0 var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg-soft);
+    overflow: hidden;
   }
   .cmdtable .row {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
-    border-block-end: 1px dashed var(--rule-soft);
-    transition: background .15s;
+    transition: background 0.15s;
   }
-  .cmdtable .row:last-child { border-block-end: 0; }
-  .cmdtable .row:hover { background: color-mix(in oklab, var(--paper-soft) 80%, var(--mustard) 12%); }
+  .cmdtable .row + .row { border-block-start: 1px solid var(--rule); }
+  .cmdtable .row:not(.head):hover {
+    background: color-mix(in oklab, var(--bg-soft) 80%, var(--accent) 6%);
+  }
   .cmdtable .row.head {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--bg-tint);
+    color: var(--ink-3);
     font-family: var(--mono);
-    font-size: .68rem;
+    font-size: 0.68rem;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: .15em;
+    letter-spacing: 0.16em;
   }
-  .cmdtable .row.head:hover { background: var(--ink); }
-  .cmdtable .cell { padding: .8rem 1rem; }
-  .cmdtable .cell.k { font-family: var(--mono); font-weight: 500; color: var(--burgundy); }
-  .cmdtable .row.head .cell.k { color: var(--paper); }
+  .cmdtable .cell { padding: 0.95rem 1.15rem; }
+  .cmdtable .cell.k {
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .cmdtable .row.head .cell.k { color: var(--ink-3); }
 
   /* KEY CARDS — container query */
   .keys {
@@ -397,140 +413,121 @@
   }
   .keycard {
     border: 1px solid var(--rule);
-    padding: 1.1rem 1.2rem;
-    background: var(--paper);
-    position: relative;
+    border-radius: var(--radius);
+    padding: 1.3rem 1.4rem 1.4rem;
+    background: var(--bg-soft);
     display: grid;
-    gap: .35rem;
-    transition: transform .2s, box-shadow .2s;
+    gap: 0.4rem;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
   }
   .keycard:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 var(--rust);
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--rule));
+    background: color-mix(in oklab, var(--bg-soft) 88%, var(--accent) 5%);
+    transform: translateY(-2px);
   }
   .keycard .tag {
     font-family: var(--mono);
-    font-size: .65rem;
-    letter-spacing: .15em;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--rust);
+    color: var(--accent);
   }
   .keycard h3 {
-    font-family: var(--mono);
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-family: var(--display);
+    font-variation-settings: "opsz" 36, "SOFT" 60, "wght" 450;
+    font-size: 1.3rem;
     color: var(--ink);
-    letter-spacing: 0;
+    margin: 0;
   }
   .keycard p {
-    font-size: .95rem;
-    color: var(--ink-soft);
+    font-size: 0.96rem;
+    color: var(--ink-2);
+    line-height: 1.55;
     max-inline-size: none;
   }
-  /* container-query: at wider widths, switch keycards to a horizontal layout */
-  @container keys (min-width: 640px) {
-    .keycard.featured {
-      grid-column: span 2;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
+  @container keys (min-width: 720px) {
+    .keycard.featured { grid-column: span 2; }
   }
 
   /* CODE BLOCKS */
-  pre.cli {
+  pre.code {
     font-family: var(--mono);
-    font-size: .82rem;
-    line-height: 1.6;
-    background: var(--ink);
-    color: light-dark(#f4d9a4, #e8d4a8);
-    padding: 1.1rem 1.25rem 1.25rem;
-    overflow-x: auto;
+    font-size: 0.83rem;
+    line-height: 1.65;
+    color: var(--ink);
+    background: var(--bg-soft);
+    padding: 1.15rem 1.3rem 1.3rem;
     border: 1px solid var(--rule);
-    box-shadow: 5px 5px 0 var(--rust);
-    position: relative;
+    border-radius: var(--radius);
+    overflow-x: auto;
     margin-block: 1.25rem;
+    position: relative;
   }
-  pre.cli::before {
+  pre.code::before {
     content: attr(data-label);
     position: absolute;
-    top: 0; right: 0;
-    padding: .25rem .65rem;
-    background: var(--rust);
-    color: #fff8e7;
-    font-size: .62rem;
+    top: 0.7rem;
+    right: 0.95rem;
+    padding: 0.18rem 0.55rem;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    letter-spacing: .18em;
+    color: var(--ink-3);
+    background: var(--bg-tint);
+    border-radius: 999px;
   }
-  pre.cli .pmpt { color: light-dark(#e89a4a, #e07a3f); user-select: none; }
-  pre.cli .cmt  { color: light-dark(#a08868, #8a7050); font-style: italic; }
-  pre.cli .key  { color: light-dark(#e5ba4a, #f0c95a); }
-  pre.cli .str  { color: light-dark(#c8d6a0, #b3aa48); }
+  pre.code .pmpt { color: var(--accent); user-select: none; }
+  pre.code .cmt  { color: var(--ink-3); font-style: italic; }
+  pre.code .key  { color: var(--accent-3); }
+  pre.code .str  { color: var(--accent-2); }
 
   /* CALLOUTS */
-  .alert {
+  .note {
     margin-block: 1.5rem;
-    padding: 1.1rem 1.3rem 1.1rem 1.5rem;
-    border-inline-start: 4px solid var(--burgundy);
-    background: color-mix(in oklab, var(--paper-soft) 85%, var(--burgundy) 8%);
+    padding: 1.05rem 1.3rem;
+    background: color-mix(in oklab, var(--bg-soft) 88%, var(--accent) 7%);
+    border: 1px solid color-mix(in oklab, var(--accent) 22%, var(--rule));
+    border-inline-start: 3px solid var(--accent);
+    border-radius: var(--radius);
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: .9rem;
-    align-items: start;
+    gap: 0.3rem;
   }
-  .alert .glyph {
-    font-family: var(--serif);
-    font-size: 1.6rem;
-    font-style: italic;
-    color: var(--burgundy);
-    line-height: 1;
-  }
-  .alert h4 {
-    color: var(--burgundy);
+  .note h4 {
+    color: var(--accent);
     font-family: var(--mono);
-    font-size: .72rem;
-    letter-spacing: .15em;
-    margin-block-end: .25rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
-  .alert p { font-size: .98rem; }
+  .note p {
+    color: var(--ink-2);
+    font-size: 0.96rem;
+    max-inline-size: none;
+  }
 
   /* PULL QUOTE */
   .pull {
     grid-column: 1 / -1;
-    font-family: var(--serif);
+    font-family: var(--display);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 350;
     font-style: italic;
-    font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
-    line-height: 1.2;
+    font-size: clamp(1.4rem, 1.05rem + 1.4vw, 2rem);
+    line-height: 1.3;
+    color: var(--ink);
     text-wrap: balance;
-    color: var(--rust);
-    border-block: 2px solid var(--rule);
-    padding-block: 1.5rem;
-    margin-block: 2rem;
     text-align: center;
+    border-block: 1px solid var(--rule);
+    padding-block: 2rem;
+    margin-block: 2.5rem;
     max-inline-size: none;
-    position: relative;
   }
-  .pull::before, .pull::after {
-    content: "";
-    position: absolute;
-    inline-size: 12px;
-    block-size: 12px;
-    border: 1px solid var(--rust);
-    background: var(--paper);
-    rotate: 45deg;
-  }
-  .pull::before { inset-block-start: -7px; inset-inline-start: 50%; translate: -50%; }
-  .pull::after  { inset-block-end: -7px;   inset-inline-start: 50%; translate: -50%; }
+  .pull em { color: var(--accent); }
 }
 
-/* ───────── utilities ───────── */
+/* ─────── utilities ─────── */
 @layer util {
-  .ornament {
-    text-align: center;
-    font-family: var(--serif);
-    color: var(--ink-soft);
-    letter-spacing: .8em;
-    margin-block: 2rem;
-  }
   .visually-hidden {
     position: absolute;
     inline-size: 1px; block-size: 1px;
@@ -540,124 +537,108 @@
   }
 }
 
-/* entrance animation */
+/* entrance */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes ink-set {
-    from { opacity: 0; translate: 0 .8rem; }
+  @keyframes settle {
+    from { opacity: 0; translate: 0 0.6rem; }
     to   { opacity: 1; translate: 0 0; }
   }
-  .masthead, .deck, .toc, .prose > * {
-    animation: ink-set .7s cubic-bezier(.22,.8,.3,1) both;
+  .masthead, .toc, .prose > section {
+    animation: settle 0.7s cubic-bezier(.22,.8,.3,1) both;
   }
-  .deck { animation-delay: .08s; }
-  .toc { animation-delay: .16s; }
-  .prose > h2 { animation-delay: .2s; }
-  .prose > * + * { animation-delay: .25s; }
+  .toc { animation-delay: 0.1s; }
+  .prose > section:nth-of-type(1) { animation-delay: 0.15s; }
+  .prose > section:nth-of-type(2) { animation-delay: 0.2s; }
+  .prose > section:nth-of-type(n+3) { animation-delay: 0.25s; }
 }
 </style>
 </head>
 
 <body>
 
-<a class="skip" href="#main">Skip to manual</a>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="vellum" aria-hidden="true"></div>
-
-<!-- bauhaus stamps in the margins -->
-<svg class="stamp s1" viewBox="0 0 200 200" aria-hidden="true">
-  <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-width="2"/>
-  <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="2"/>
-  <path d="M100 8 L100 192 M8 100 L192 100" stroke="currentColor" stroke-width="2"/>
-  <text x="100" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" letter-spacing="3" fill="currentColor">VOL · 01</text>
-</svg>
-
-<svg class="stamp s2" viewBox="0 0 160 160" aria-hidden="true">
-  <rect x="10" y="10" width="140" height="140" fill="none" stroke="currentColor" stroke-width="2"/>
-  <rect x="30" y="30" width="100" height="100" fill="currentColor" opacity=".15"/>
-  <path d="M30 30 L130 130 M130 30 L30 130" stroke="currentColor" stroke-width="1.5"/>
-</svg>
-
-<svg class="stamp s3" viewBox="0 0 100 100" aria-hidden="true">
-  <path d="M50 5 L50 95 M5 50 L95 50" stroke="currentColor" stroke-width="3" stroke-linecap="square"/>
-  <circle cx="50" cy="50" r="20" fill="currentColor" opacity=".4"/>
+<div class="surface" aria-hidden="true"></div>
+<svg class="ornament" viewBox="0 0 200 200" aria-hidden="true">
+  <circle cx="100" cy="100" r="98" fill="none" stroke="currentColor" stroke-width="0.6"/>
+  <circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" stroke-width="0.6"/>
+  <circle cx="100" cy="100" r="54" fill="none" stroke="currentColor" stroke-width="0.6"/>
+  <circle cx="100" cy="100" r="32" fill="currentColor" opacity="0.45"/>
 </svg>
 
 <div class="shell">
 
   <header class="masthead" role="banner">
-    <h1 class="wordmark">
-      git<span class="amp">·</span>md
-    </h1>
-    <div class="colophon" aria-label="Edition information">
-      Field Manual № 01<br>
-      Edition <b>v0.4.x</b><br>
-      Pressed in Go 1.24<br>
-      MIT — flaticols
+    <div class="brand">
+      <h1 class="wordmark">git<span class="dot" aria-hidden="true"></span>md</h1>
+      <span class="badge" aria-label="Version">v0.4 · go 1.24</span>
     </div>
+    <p class="lede" role="doc-subtitle">
+      A small, opinionated CLI for the structured <em>Key: Value</em> trailers
+      that live at the foot of every well-kept commit message — built atop
+      git's own <code>interpret-trailers</code>.
+    </p>
+    <dl class="meta" aria-label="Project metadata">
+      <div><dt>License</dt> <dd>MIT</dd></div>
+      <div><dt>Source</dt> <dd><a href="https://github.com/flaticols/gitmd">flaticols/gitmd</a></dd></div>
+      <div><dt>Requires</dt> <dd>git ≥ 2.54</dd></div>
+      <div><dt>Updated</dt> <dd>April 2026</dd></div>
+    </dl>
   </header>
-
-  <p class="deck" role="doc-subtitle">
-    A small, opinionated CLI for managing the structured <em>Key: Value</em> trailers
-    that live at the foot of every well-kept commit message — built atop git's
-    own <code>interpret-trailers</code>.
-  </p>
 
   <div class="doc">
 
-    <aside class="toc-wrap" aria-label="Table of contents">
+    <aside class="toc-wrap" aria-label="On this page">
       <nav class="toc" aria-labelledby="toc-title">
-        <h2 id="toc-title">Contents</h2>
+        <h2 id="toc-title">On this page</h2>
         <ol>
           <li><a href="#install" aria-current="false">Installation</a></li>
           <li><a href="#quickstart" aria-current="true">Quickstart</a></li>
           <li><a href="#commands">Commands</a></li>
           <li><a href="#keys">Trailer keys</a></li>
-          <li><a href="#mechanics">Mechanics</a></li>
-          <li><a href="#safety">Safety rails</a></li>
-          <li><a href="#colophon">Colophon</a></li>
+          <li><a href="#mechanics">How it works</a></li>
+          <li><a href="#safety">Safety</a></li>
         </ol>
       </nav>
     </aside>
 
-    <main id="main" class="prose" style="counter-reset: chapter;">
+    <main id="main" class="prose">
 
       <section id="install" aria-labelledby="install-h">
+        <span class="eyebrow">01</span>
         <h2 id="install-h">Installation</h2>
         <p>
-          Three supported channels, in order of how reproducible the binary is.
-          The Go install is the simplest; the Nix derivation is the one your
-          coworkers will thank you for picking.
+          Three supported channels. The Go install is the simplest;
+          the Nix derivation is what your coworkers will thank you for picking.
         </p>
 
         <h3>Go, system-wide</h3>
-<pre class="cli" data-label="shell"><span class="pmpt">$ </span>go install github.com/flaticols/gitmd/cmd/gitmd@latest</pre>
+<pre class="code" data-label="shell"><span class="pmpt">$ </span>go install github.com/flaticols/gitmd/cmd/gitmd@latest</pre>
 
         <h3>Go tool, project-pinned</h3>
-<pre class="cli" data-label="shell"><span class="cmt"># Go 1.24+, version recorded in go.mod</span>
+<pre class="code" data-label="shell"><span class="cmt"># Go 1.24+, version recorded in go.mod</span>
 <span class="pmpt">$ </span>go get -tool github.com/flaticols/gitmd/cmd/gitmd@latest
 <span class="pmpt">$ </span>go tool gitmd show</pre>
 
         <h3>Nix, macOS</h3>
-<pre class="cli" data-label="nix"><span class="pmpt">$ </span>nix-env -if https://github.com/flaticols/gitmd/raw/latest/nix/gitmd.nix</pre>
+<pre class="code" data-label="nix"><span class="pmpt">$ </span>nix-env -if https://github.com/flaticols/gitmd/raw/latest/nix/gitmd.nix</pre>
 
-        <div class="alert" role="note" aria-labelledby="nix-note">
-          <span class="glyph" aria-hidden="true">¶</span>
-          <div>
-            <h4 id="nix-note">Note on platforms</h4>
-            <p>The release pipeline currently ships <code>aarch64-darwin</code> and <code>x86_64-darwin</code>. Linux users build from source.</p>
-          </div>
+        <div class="note" role="note" aria-labelledby="nix-note">
+          <h4 id="nix-note">Platforms</h4>
+          <p>The release pipeline currently ships <code>aarch64-darwin</code> and <code>x86_64-darwin</code>. Linux users build from source.</p>
         </div>
       </section>
 
       <section id="quickstart" aria-labelledby="quick-h">
+        <span class="eyebrow">02</span>
         <h2 id="quick-h">Quickstart</h2>
         <p>
-          Every <code>gitmd</code> verb takes an optional <code>&lt;ref&gt;</code> — anything
-          <code>git rev-parse</code> accepts. Omit it and you operate on
-          <code>HEAD</code>, which is what you want most of the time.
+          Every <code>gitmd</code> verb takes an optional <code>&lt;ref&gt;</code> —
+          anything <code>git rev-parse</code> accepts. Omit it and you operate
+          on <code>HEAD</code>, which is what you want most of the time.
         </p>
 
-<pre class="cli" data-label="recipes"><span class="cmt"># attach reasoning + ticket to the commit you just made</span>
+<pre class="code" data-label="recipes"><span class="cmt"># attach reasoning + ticket to the commit you just made</span>
 <span class="pmpt">$ </span>gitmd add --reason <span class="str">"required for audit"</span> --ticket <span class="str">JIRA-1234</span>
 
 <span class="cmt"># replace, don't append</span>
@@ -670,16 +651,45 @@
 <span class="cmt"># reach back two commits, attach an arbitrary trailer</span>
 <span class="pmpt">$ </span>gitmd add HEAD~2 --trailer <span class="str">"Reviewed-by=Alice &lt;a@x&gt;"</span></pre>
 
+        <h3>Real <code>show</code> output</h3>
+        <p>
+          From the very commit that introduced this page. Pretty form for
+          humans, <code>--json</code> for <code>jq</code> and friends.
+        </p>
+
+<pre class="code" data-label="gitmd show"><span class="pmpt">$ </span>gitmd show
+<span class="key">commit</span>  33d2dff8 — docs: add retro-styled single-page HTML reference manual
+<span class="key">author</span>  Denis Panfilov &lt;gh@flaticols.dev&gt;  2026-04-28T20:21:52+02:00
+
+  <span class="key">Reason</span>    single-page reference manual for the project; satisfies the docs/ workflow added on origin
+  <span class="key">Assisted</span>  Claude Code (Opus 4.7)</pre>
+
+<pre class="code" data-label="gitmd show --json"><span class="pmpt">$ </span>gitmd show --json
+{
+  <span class="key">"commit"</span>: <span class="str">"33d2dff8be6ea9b3a534d64cc3e13773cf1cc439"</span>,
+  <span class="key">"subject"</span>: <span class="str">"docs: add retro-styled single-page HTML reference manual"</span>,
+  <span class="key">"author"</span>: {
+    <span class="key">"name"</span>:  <span class="str">"Denis Panfilov"</span>,
+    <span class="key">"email"</span>: <span class="str">"gh@flaticols.dev"</span>,
+    <span class="key">"date"</span>:  <span class="str">"2026-04-28T20:21:52+02:00"</span>
+  },
+  <span class="key">"trailers"</span>: [
+    { <span class="key">"key"</span>: <span class="str">"Reason"</span>,   <span class="key">"value"</span>: <span class="str">"single-page reference manual for the project; satisfies the docs/ workflow added on origin"</span> },
+    { <span class="key">"key"</span>: <span class="str">"Assisted"</span>, <span class="key">"value"</span>: <span class="str">"Claude Code (Opus 4.7)"</span> }
+  ]
+}</pre>
+
         <p class="pull" role="doc-pullquote">
           The <em>why</em> belongs on the commit, not in a wiki that will rot.
         </p>
       </section>
 
       <section id="commands" aria-labelledby="cmd-h">
+        <span class="eyebrow">03</span>
         <h2 id="cmd-h">Commands</h2>
         <p>
-          Five verbs. Three of them rewrite history and refuse to do so on a dirty
-          tree; the other two are pure reads.
+          Five verbs. Three of them rewrite history and refuse to run on a
+          dirty tree; the other two are pure reads.
         </p>
 
         <div class="cmdtable" role="table" aria-label="gitmd commands">
@@ -711,6 +721,7 @@
       </section>
 
       <section id="keys" aria-labelledby="keys-h">
+        <span class="eyebrow">04</span>
         <h2 id="keys-h">Trailer keys</h2>
         <p>
           Three predefined shortcuts cover the cases worth standardising.
@@ -721,34 +732,35 @@
         <div class="keys">
           <ul>
             <li class="keycard">
-              <span class="tag" aria-hidden="true">flag · --reason</span>
+              <span class="tag">flag · --reason</span>
               <h3>Reason</h3>
               <p>The motivation. Why this diff exists — the constraint, the bug, the user request. One sentence is enough.</p>
             </li>
             <li class="keycard">
-              <span class="tag" aria-hidden="true">flag · --ticket</span>
+              <span class="tag">flag · --ticket</span>
               <h3>Ticket</h3>
               <p>An issue or PR identifier. <code>JIRA-1234</code>, <code>gh-42</code>, anything machine-readable.</p>
             </li>
             <li class="keycard">
-              <span class="tag" aria-hidden="true">flag · --assisted</span>
+              <span class="tag">flag · --assisted</span>
               <h3>Assisted</h3>
               <p>For AI-assisted commits. The model name and version: <code>Claude Code 4.7</code>.</p>
             </li>
             <li class="keycard">
-              <span class="tag" aria-hidden="true">flag · --trailer</span>
+              <span class="tag">flag · --trailer</span>
               <h3>Idea / arbitrary</h3>
-              <p>Design notes, paths-not-taken, follow-ups. Or any custom key — <code>Reviewed-by</code>, <code>Tested-by</code>, etc.</p>
+              <p>Design notes, follow-ups, paths-not-taken. Or any custom key — <code>Reviewed-by</code>, <code>Tested-by</code>, etc.</p>
             </li>
           </ul>
         </div>
       </section>
 
       <section id="mechanics" aria-labelledby="mech-h">
-        <h2 id="mech-h">Mechanics</h2>
+        <span class="eyebrow">05</span>
+        <h2 id="mech-h">How it works</h2>
         <p>
           For <code>HEAD</code>, gitmd shells out to <code>git commit --amend</code>.
-          For any other reachable commit, it runs an interactive rebase with
+          For any other reachable commit it runs an interactive rebase with
           itself registered as <code>GIT_SEQUENCE_EDITOR</code> — the editor
           inserts a surgical <code>exec git commit --amend -F &lt;newmsg&gt;</code>
           after the target's <code>pick</code> line.
@@ -756,69 +768,47 @@
         <p>
           Trailer composition is delegated to <code>git interpret-trailers</code>,
           so gitmd inherits git's exact semantics — folded values, the
-          <code>---</code> divider, and the <em>twenty-five percent</em> trailer-line
-          tolerance.
+          <code>---</code> divider, and the <em>twenty-five percent</em>
+          trailer-line tolerance.
         </p>
-        <p class="ornament" aria-hidden="true">❦ ❦ ❦</p>
       </section>
 
       <section id="safety" aria-labelledby="safe-h">
-        <h2 id="safe-h">Safety rails</h2>
+        <span class="eyebrow">06</span>
+        <h2 id="safe-h">Safety</h2>
         <p>
-          History rewriting is the kind of thing that should never surprise you.
-          gitmd is conservative on purpose.
+          History rewriting should never surprise you. gitmd is conservative
+          on purpose.
         </p>
 
-        <div class="alert" role="note" aria-labelledby="safe-1">
-          <span class="glyph" aria-hidden="true">!</span>
-          <div>
-            <h4 id="safe-1">Refuses dirty trees</h4>
-            <p>If <code>git status</code> has anything pending, gitmd bails out before touching history. Stash or commit first.</p>
-          </div>
+        <div class="note" role="note" aria-labelledby="safe-1">
+          <h4 id="safe-1">Refuses dirty trees</h4>
+          <p>If <code>git status</code> has anything pending, gitmd bails out before touching history. Stash or commit first.</p>
         </div>
 
-        <div class="alert" role="note" aria-labelledby="safe-2">
-          <span class="glyph" aria-hidden="true">!</span>
-          <div>
-            <h4 id="safe-2">Won't amend non-HEAD merges</h4>
-            <p>Rewriting a merge commit's message via interactive rebase is a footgun. gitmd refuses; do it by hand if you must.</p>
-          </div>
+        <div class="note" role="note" aria-labelledby="safe-2">
+          <h4 id="safe-2">Won't amend non-HEAD merges</h4>
+          <p>Rewriting a merge commit's message via interactive rebase is a footgun. gitmd refuses; do it by hand if you must.</p>
         </div>
 
-        <div class="alert" role="note" aria-labelledby="safe-3">
-          <span class="glyph" aria-hidden="true">!</span>
-          <div>
-            <h4 id="safe-3">Never force-pushes</h4>
-            <p>If the rewritten commit was already published, you run <code>git push --force-with-lease</code> yourself — gitmd does not.</p>
-          </div>
+        <div class="note" role="note" aria-labelledby="safe-3">
+          <h4 id="safe-3">Never force-pushes</h4>
+          <p>If the rewritten commit was already published, you run <code>git push --force-with-lease</code> yourself — gitmd does not.</p>
         </div>
-      </section>
-
-      <section id="colophon" aria-labelledby="col-h">
-        <h2 id="col-h">Colophon</h2>
-        <p>
-          Set in <em>Fraunces</em> for display, <em>EB&nbsp;Garamond</em> for body, and
-          <em>IBM Plex Mono</em> for the machinery. Composed in modern CSS:
-          cascade <code>@layer</code>s, <code>@scope</code> for content,
-          container queries on the trailer-key index, <code>subgrid</code> for the
-          command table, <code>light-dark()</code> for theming, and the
-          <code>text-box</code> + <code>text-wrap</code> properties for tighter
-          metal-type-feeling composition.
-        </p>
       </section>
 
     </main>
   </div>
 
-  <footer class="pressmark" role="contentinfo">
-    <span>Printed digitally · Set in Fraunces &amp; EB Garamond · MIT licensed</span>
-    <span aria-label="Issue number">№ 01 / IV·26</span>
+  <footer class="pagefoot" role="contentinfo">
+    <span>© 2026 flaticols · MIT licensed</span>
+    <span>Set in Fraunces, Newsreader &amp; JetBrains Mono</span>
   </footer>
 
 </div>
 
 <script>
-  // tiny scroll-spy for TOC aria-current
+  // scroll-spy for TOC aria-current
   (function () {
     const links = document.querySelectorAll('.toc a[href^="#"]');
     const map = new Map();
@@ -836,7 +826,7 @@
           map.get(e.target)?.setAttribute('aria-current', 'true');
         }
       });
-    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+    }, { rootMargin: '-25% 0px -65% 0px', threshold: 0 });
 
     map.forEach((_, sec) => io.observe(sec));
   })();
