@@ -19,6 +19,11 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.11.4
+          # Build the linter with the workflow's Go toolchain (matches go.mod,
+          # currently 1.26.1) — golangci-lint refuses to lint a project whose
+          # `go` directive is newer than the Go used to build the linter, and
+          # no v2.x release is built with Go 1.26 yet.
+          install-mode: goinstall
 
       - name: Test
         run: go test -v -cover ./...
