@@ -30,3 +30,11 @@ linters:
         - testinggoroutine
         - unmarshal
         - unsafeptr
+
+  exclusions:
+    rules:
+      # Field alignment is irrelevant for table-driven test structs; readability wins.
+      - path: _test\.go
+        linters:
+          - govet
+        text: "fieldalignment"

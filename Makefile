@@ -1,7 +1,15 @@
 BUILD_FLAGS=-gcflags="all=-N -l" -trimpath -mod=readonly -modcacherw
 
+.PHONY: build lint test install check run
+
 build:
 	go build $(BUILD_FLAGS) ./...
+
+run:
+	go run ./cmd/gitmd
+
+install:
+	go install $(BUILD_FLAGS) ./cmd/gitmd
 
 lint:
 	golangci-lint run --timeout 5m
@@ -9,14 +17,8 @@ lint:
 test:
 	go test -v -cover ./...
 
-build:
-	go build $(BUILD_FLAGS) ./...
-
-install:
-	go install go.uber.org/nilaway/cmd/nilaway@latest
-
 check:
 	go mod tidy
 	git diff --exit-code
-	make lint
-	make test
+	$(MAKE) lint
+	$(MAKE) test
