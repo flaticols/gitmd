@@ -1,0 +1,32 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    - cyclop
+    - govet
+
+  settings:
+    govet:
+      disable-all: true
+      enable:
+        - assign
+        - atomic
+        - atomicalign
+        - bools
+        - buildtag
+        - cgocall
+        - copylocks
+        - defers
+        - fieldalignment
+        - httpresponse
+        - ifaceassert
+        - loopclosure
+        - lostcancel
+        - nilfunc
+        - printf
+        - shadow
+        - sigchanyzer
+        - slog
+        - testinggoroutine
+        - unmarshal
+        - unsafeptr
