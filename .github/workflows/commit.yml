@@ -29,6 +29,16 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.11.4
+          # Compile the linter with the workflow's Go (matches go.mod, 1.26).
+          # Required while no v2.x release is shipped built with Go 1.26 —
+          # binary mode would fail with "Go language version used to build
+          # golangci-lint is lower than the targeted Go version".
+          install-mode: goinstall
+
       - name: Run tests
         run: go test -v ./...
 
