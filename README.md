@@ -55,6 +55,36 @@ gitmd add HEAD~2 --assisted "Claude Code 4.7" --trailer "Reviewed-by=Alice <a@x>
 gitmd show HEAD~3 --json
 ```
 
+### What `show` looks like
+
+Pretty form — what you read:
+
+```
+commit  33d2dff8 — docs: add retro-styled single-page HTML reference manual
+author  Denis Panfilov <gh@flaticols.dev>  2026-04-28T20:21:52+02:00
+
+  Reason    single-page reference manual for the project; satisfies the docs/ workflow added on origin
+  Assisted  Claude Code (Opus 4.7)
+```
+
+JSON form — what your scripts read:
+
+```json
+{
+  "commit": "33d2dff8be6ea9b3a534d64cc3e13773cf1cc439",
+  "subject": "docs: add retro-styled single-page HTML reference manual",
+  "author": {
+    "name": "Denis Panfilov",
+    "email": "gh@flaticols.dev",
+    "date": "2026-04-28T20:21:52+02:00"
+  },
+  "trailers": [
+    { "key": "Reason",   "value": "single-page reference manual for the project; satisfies the docs/ workflow added on origin" },
+    { "key": "Assisted", "value": "Claude Code (Opus 4.7)" }
+  ]
+}
+```
+
 ## Commands
 
 `<ref>` is optional everywhere and defaults to `HEAD`.
