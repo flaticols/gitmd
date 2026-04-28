@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="gitmd — a small Go CLI for managing git commit trailers. Reference manual.">
+<title>gitmd · Field Manual № 01</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ───────── cascade layers ───────── */
+@layer reset, tokens, base, pattern, layout, doc, ui, util;
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { min-block-size: 100dvb; }
+  img, svg { display: block; max-inline-size: 100%; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible {
+    outline: 2px solid var(--rust);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ───────── design tokens ───────── */
+@layer tokens {
+  :root {
+    /* WARM PAPER PALETTE — deliberately not blue */
+    --paper:        light-dark(#f3e8d0, #1c140f);
+    --paper-soft:   light-dark(#ecdfc0, #251c15);
+    --paper-edge:   light-dark(#e0d2af, #2e2218);
+    --ink:          light-dark(#2a1a10, #ecd9b0);
+    --ink-soft:     light-dark(#5a3e2b, #b89878);
+    --rust:         light-dark(#a8401b, #e07a3f);
+    --burgundy:     light-dark(#7a2424, #c64a4a);
+    --mustard:      light-dark(#b88322, #e5ba4a);
+    --olive:        light-dark(#5d5b1f, #b3aa48);
+    --rule:         light-dark(#3a2618, #6e553c);
+    --rule-soft:    color-mix(in oklab, var(--rule) 22%, transparent);
+    --shadow:       light-dark(rgba(60,30,12,.18), rgba(0,0,0,.55));
+    --halftone:     light-dark(#8b6a3a, #6a4a26);
+
+    --serif:    "Fraunces", ui-serif, Georgia, serif;
+    --body:     "EB Garamond", ui-serif, "Iowan Old Style", Georgia, serif;
+    --mono:     "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --max:      78rem;
+    --gutter:   clamp(1.25rem, 2.4vw, 2.5rem);
+
+    color-scheme: light dark;
+  }
+}
+
+/* ───────── base typography ───────── */
+@layer base {
+  body {
+    font-family: var(--body);
+    font-size: clamp(1.02rem, .9rem + .35vw, 1.18rem);
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--paper);
+    font-feature-settings: "kern", "liga", "onum", "pnum";
+    text-wrap: pretty;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--serif);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+    color: var(--ink);
+    text-wrap: balance;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    /* trims line-box to actual cap height for tight composition */
+    text-box: trim-both cap alphabetic;
+  }
+  h2 { font-size: clamp(1.7rem, 1.2rem + 1.6vw, 2.6rem); font-weight: 600; }
+  h3 { font-size: clamp(1.25rem, 1.05rem + .6vw, 1.55rem); font-weight: 550; }
+  h4 { font-size: 1.05rem; font-weight: 600; font-family: var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+  p  { hanging-punctuation: first last; max-inline-size: 64ch; }
+  strong { font-weight: 600; color: var(--ink); }
+  em { font-style: italic; color: var(--burgundy); }
+  code, kbd, samp {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: color-mix(in oklab, var(--paper-soft) 75%, var(--rust) 6%);
+    padding: .08em .35em;
+    border-radius: 2px;
+    border: 1px solid var(--rule-soft);
+  }
+  ::selection { background: var(--mustard); color: #1a0f08; }
+}
+
+/* ───────── decorative SVG pattern ───────── */
+@layer pattern {
+  .vellum {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* layered: halftone dot grid + diagonal lines + warm vignette */
+    background:
+      radial-gradient(ellipse at 50% 0%, transparent 40%, var(--shadow) 110%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='2' cy='2' r='1' fill='%23000' opacity='.18'/><circle cx='16' cy='16' r='.6' fill='%23000' opacity='.10'/></svg>"),
+      repeating-linear-gradient(135deg,
+        transparent 0 22px,
+        color-mix(in oklab, var(--halftone) 35%, transparent) 22px 23px);
+    background-blend-mode: normal, multiply, normal;
+  }
+  /* big decorative shapes — bauhaus stamps in the margins */
+  .stamp {
+    position: fixed;
+    pointer-events: none;
+    z-index: -1;
+    color: var(--rust);
+    opacity: .55;
+    mix-blend-mode: multiply;
+  }
+  @media (prefers-color-scheme: dark) {
+    .stamp { mix-blend-mode: screen; opacity: .22; }
+  }
+  .stamp.s1 { top: 7vh; right: -3vw; inline-size: min(24vw, 280px); rotate: 12deg; }
+  .stamp.s2 { bottom: 4vh; left: -2vw; inline-size: min(18vw, 220px); rotate: -8deg; color: var(--burgundy); }
+  .stamp.s3 { top: 42vh; left: 38vw; inline-size: 90px; opacity: .35; color: var(--mustard); }
+  @media (max-width: 760px) {
+    .stamp.s1, .stamp.s3 { display: none; }
+  }
+}
+
+/* ───────── overall layout ───────── */
+@layer layout {
+  body { padding-inline: var(--gutter); }
+  .shell { max-inline-size: var(--max); margin-inline: auto; }
+
+  /* MASTHEAD */
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1rem;
+    padding-block: 2rem 1rem;
+    border-block-end: 2px solid var(--rule);
+    position: relative;
+  }
+  .masthead::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -7px;
+    block-size: 1px;
+    background: var(--rule);
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 700;
+    font-size: clamp(3.5rem, 4rem + 6vw, 9rem);
+    line-height: .82;
+    letter-spacing: -0.045em;
+    color: var(--ink);
+    text-box: trim-both cap alphabetic;
+  }
+  .wordmark .amp {
+    font-style: italic;
+    color: var(--rust);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 400;
+  }
+  .colophon {
+    font-family: var(--mono);
+    font-size: .72rem;
+    text-align: end;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    line-height: 1.7;
+  }
+  .colophon b { color: var(--burgundy); font-weight: 500; }
+
+  .deck {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .25rem 2rem;
+    padding-block: 1rem 1.5rem;
+    border-block-end: 1px solid var(--rule);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.1rem, .9rem + .8vw, 1.4rem);
+    color: var(--ink-soft);
+    max-inline-size: 56ch;
+  }
+  @container style(--w-md: 1) {} /* placeholder to silence linters */
+
+  /* DOC GRID */
+  .doc {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.25rem;
+    padding-block: 2.25rem 4rem;
+  }
+  @media (min-width: 980px) {
+    .doc {
+      grid-template-columns: 18rem minmax(0, 1fr);
+      gap: 3rem;
+      align-items: start;
+    }
+    .toc-wrap { position: sticky; top: 1.5rem; }
+  }
+
+  /* footer */
+  .pressmark {
+    border-block-start: 2px solid var(--rule);
+    padding-block: 1.5rem 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1rem;
+    font-family: var(--mono);
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--ink-soft);
+  }
+}
+
+/* ───────── document content (scoped) ───────── */
+@layer doc {
+  /* @scope keeps these styles from leaking into UI chrome */
+  @scope (.prose) {
+    :scope > * + * { margin-block-start: 1rem; }
+    :scope > h2 { margin-block-start: 2.6rem; }
+    :scope > h3 { margin-block-start: 1.6rem; }
+
+    h2 {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: baseline;
+      gap: .9rem;
+      font-variation-settings: "opsz" 144, "SOFT" 80, "wght" 600;
+    }
+    h2::before {
+      content: "§ " counter(chapter, decimal-leading-zero);
+      counter-increment: chapter;
+      font-family: var(--mono);
+      font-size: .55em;
+      letter-spacing: .15em;
+      color: var(--rust);
+      text-transform: uppercase;
+      align-self: center;
+      padding-block: .35em .25em;
+      padding-inline: .55em;
+      border: 1px solid var(--rust);
+      border-radius: 2px;
+    }
+    h2::after {
+      content: "";
+      block-size: 1px;
+      background: var(--rule-soft);
+      align-self: end;
+      margin-block-end: .55em;
+    }
+
+    /* drop cap on first paragraph of each section */
+    h2 + p::first-letter {
+      font-family: var(--serif);
+      font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 800;
+      initial-letter: 3 2;
+      color: var(--rust);
+      margin-inline-end: .35rem;
+      font-style: normal;
+    }
+
+    p { text-wrap: pretty; }
+
+    a {
+      color: var(--rust);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: .18em;
+      text-decoration-color: color-mix(in oklab, var(--rust) 40%, transparent);
+      transition: text-decoration-color .2s, color .2s;
+    }
+    a:hover {
+      text-decoration-color: var(--rust);
+      color: var(--burgundy);
+    }
+  }
+}
+
+/* ───────── components ───────── */
+@layer ui {
+  /* SKIP LINK */
+  .skip {
+    position: absolute;
+    inset-inline-start: 1rem;
+    inset-block-start: -3rem;
+    padding: .5rem .9rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: .8rem;
+    z-index: 100;
+    transition: inset-block-start .2s;
+  }
+  .skip:focus { inset-block-start: 1rem; }
+
+  /* TABLE OF CONTENTS */
+  .toc {
+    font-family: var(--mono);
+    font-size: .82rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--paper) 92%, var(--mustard) 4%);
+    padding: 1.1rem 1.2rem 1.3rem;
+    box-shadow: 4px 4px 0 var(--rule);
+  }
+  .toc h2 {
+    font-family: var(--mono);
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    color: var(--rust);
+    margin-block-end: .9rem;
+    padding-block-end: .55rem;
+    border-block-end: 1px dashed var(--rule);
+  }
+  .toc ol { list-style: none; counter-reset: toc; display: grid; gap: .35rem; }
+  .toc li { counter-increment: toc; }
+  .toc a {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: .5rem;
+    padding-block: .15rem;
+    text-decoration: none;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    color: var(--ink-soft);
+    font-size: .7rem;
+    align-self: center;
+  }
+  .toc a:hover { color: var(--rust); }
+  .toc a[aria-current="true"] {
+    color: var(--burgundy);
+    font-weight: 600;
+  }
+  .toc a[aria-current="true"]::before { color: var(--burgundy); }
+
+  /* COMMAND TABLE — uses subgrid */
+  .cmdtable {
+    display: grid;
+    grid-template-columns: minmax(8rem, max-content) 1fr;
+    gap: 0;
+    margin-block: 1.5rem;
+    border: 1px solid var(--rule);
+    background: var(--paper-soft);
+    box-shadow: 5px 5px 0 var(--rule);
+  }
+  .cmdtable .row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    border-block-end: 1px dashed var(--rule-soft);
+    transition: background .15s;
+  }
+  .cmdtable .row:last-child { border-block-end: 0; }
+  .cmdtable .row:hover { background: color-mix(in oklab, var(--paper-soft) 80%, var(--mustard) 12%); }
+  .cmdtable .row.head {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+  }
+  .cmdtable .row.head:hover { background: var(--ink); }
+  .cmdtable .cell { padding: .8rem 1rem; }
+  .cmdtable .cell.k { font-family: var(--mono); font-weight: 500; color: var(--burgundy); }
+  .cmdtable .row.head .cell.k { color: var(--paper); }
+
+  /* KEY CARDS — container query */
+  .keys {
+    container-type: inline-size;
+    container-name: keys;
+    margin-block: 1.5rem;
+  }
+  .keys ul {
+    list-style: none;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+  .keycard {
+    border: 1px solid var(--rule);
+    padding: 1.1rem 1.2rem;
+    background: var(--paper);
+    position: relative;
+    display: grid;
+    gap: .35rem;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .keycard:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--rust);
+  }
+  .keycard .tag {
+    font-family: var(--mono);
+    font-size: .65rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--rust);
+  }
+  .keycard h3 {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0;
+  }
+  .keycard p {
+    font-size: .95rem;
+    color: var(--ink-soft);
+    max-inline-size: none;
+  }
+  /* container-query: at wider widths, switch keycards to a horizontal layout */
+  @container keys (min-width: 640px) {
+    .keycard.featured {
+      grid-column: span 2;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  /* CODE BLOCKS */
+  pre.cli {
+    font-family: var(--mono);
+    font-size: .82rem;
+    line-height: 1.6;
+    background: var(--ink);
+    color: light-dark(#f4d9a4, #e8d4a8);
+    padding: 1.1rem 1.25rem 1.25rem;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    box-shadow: 5px 5px 0 var(--rust);
+    position: relative;
+    margin-block: 1.25rem;
+  }
+  pre.cli::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 0; right: 0;
+    padding: .25rem .65rem;
+    background: var(--rust);
+    color: #fff8e7;
+    font-size: .62rem;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+  }
+  pre.cli .pmpt { color: light-dark(#e89a4a, #e07a3f); user-select: none; }
+  pre.cli .cmt  { color: light-dark(#a08868, #8a7050); font-style: italic; }
+  pre.cli .key  { color: light-dark(#e5ba4a, #f0c95a); }
+  pre.cli .str  { color: light-dark(#c8d6a0, #b3aa48); }
+
+  /* CALLOUTS */
+  .alert {
+    margin-block: 1.5rem;
+    padding: 1.1rem 1.3rem 1.1rem 1.5rem;
+    border-inline-start: 4px solid var(--burgundy);
+    background: color-mix(in oklab, var(--paper-soft) 85%, var(--burgundy) 8%);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .9rem;
+    align-items: start;
+  }
+  .alert .glyph {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-style: italic;
+    color: var(--burgundy);
+    line-height: 1;
+  }
+  .alert h4 {
+    color: var(--burgundy);
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .15em;
+    margin-block-end: .25rem;
+  }
+  .alert p { font-size: .98rem; }
+
+  /* PULL QUOTE */
+  .pull {
+    grid-column: 1 / -1;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+    line-height: 1.2;
+    text-wrap: balance;
+    color: var(--rust);
+    border-block: 2px solid var(--rule);
+    padding-block: 1.5rem;
+    margin-block: 2rem;
+    text-align: center;
+    max-inline-size: none;
+    position: relative;
+  }
+  .pull::before, .pull::after {
+    content: "";
+    position: absolute;
+    inline-size: 12px;
+    block-size: 12px;
+    border: 1px solid var(--rust);
+    background: var(--paper);
+    rotate: 45deg;
+  }
+  .pull::before { inset-block-start: -7px; inset-inline-start: 50%; translate: -50%; }
+  .pull::after  { inset-block-end: -7px;   inset-inline-start: 50%; translate: -50%; }
+}
+
+/* ───────── utilities ───────── */
+@layer util {
+  .ornament {
+    text-align: center;
+    font-family: var(--serif);
+    color: var(--ink-soft);
+    letter-spacing: .8em;
+    margin-block: 2rem;
+  }
+  .visually-hidden {
+    position: absolute;
+    inline-size: 1px; block-size: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+}
+
+/* entrance animation */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ink-set {
+    from { opacity: 0; translate: 0 .8rem; }
+    to   { opacity: 1; translate: 0 0; }
+  }
+  .masthead, .deck, .toc, .prose > * {
+    animation: ink-set .7s cubic-bezier(.22,.8,.3,1) both;
+  }
+  .deck { animation-delay: .08s; }
+  .toc { animation-delay: .16s; }
+  .prose > h2 { animation-delay: .2s; }
+  .prose > * + * { animation-delay: .25s; }
+}
+</style>
+</head>
+
+<body>
+
+<a class="skip" href="#main">Skip to manual</a>
+
+<div class="vellum" aria-hidden="true"></div>
+
+<!-- bauhaus stamps in the margins -->
+<svg class="stamp s1" viewBox="0 0 200 200" aria-hidden="true">
+  <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-width="2"/>
+  <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M100 8 L100 192 M8 100 L192 100" stroke="currentColor" stroke-width="2"/>
+  <text x="100" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" letter-spacing="3" fill="currentColor">VOL · 01</text>
+</svg>
+
+<svg class="stamp s2" viewBox="0 0 160 160" aria-hidden="true">
+  <rect x="10" y="10" width="140" height="140" fill="none" stroke="currentColor" stroke-width="2"/>
+  <rect x="30" y="30" width="100" height="100" fill="currentColor" opacity=".15"/>
+  <path d="M30 30 L130 130 M130 30 L30 130" stroke="currentColor" stroke-width="1.5"/>
+</svg>
+
+<svg class="stamp s3" viewBox="0 0 100 100" aria-hidden="true">
+  <path d="M50 5 L50 95 M5 50 L95 50" stroke="currentColor" stroke-width="3" stroke-linecap="square"/>
+  <circle cx="50" cy="50" r="20" fill="currentColor" opacity=".4"/>
+</svg>
+
+<div class="shell">
+
+  <header class="masthead" role="banner">
+    <h1 class="wordmark">
+      git<span class="amp">·</span>md
+    </h1>
+    <div class="colophon" aria-label="Edition information">
+      Field Manual № 01<br>
+      Edition <b>v0.4.x</b><br>
+      Pressed in Go 1.24<br>
+      MIT — flaticols
+    </div>
+  </header>
+
+  <p class="deck" role="doc-subtitle">
+    A small, opinionated CLI for managing the structured <em>Key: Value</em> trailers
+    that live at the foot of every well-kept commit message — built atop git's
+    own <code>interpret-trailers</code>.
+  </p>
+
+  <div class="doc">
+
+    <aside class="toc-wrap" aria-label="Table of contents">
+      <nav class="toc" aria-labelledby="toc-title">
+        <h2 id="toc-title">Contents</h2>
+        <ol>
+          <li><a href="#install" aria-current="false">Installation</a></li>
+          <li><a href="#quickstart" aria-current="true">Quickstart</a></li>
+          <li><a href="#commands">Commands</a></li>
+          <li><a href="#keys">Trailer keys</a></li>
+          <li><a href="#mechanics">Mechanics</a></li>
+          <li><a href="#safety">Safety rails</a></li>
+          <li><a href="#colophon">Colophon</a></li>
+        </ol>
+      </nav>
+    </aside>
+
+    <main id="main" class="prose" style="counter-reset: chapter;">
+
+      <section id="install" aria-labelledby="install-h">
+        <h2 id="install-h">Installation</h2>
+        <p>
+          Three supported channels, in order of how reproducible the binary is.
+          The Go install is the simplest; the Nix derivation is the one your
+          coworkers will thank you for picking.
+        </p>
+
+        <h3>Go, system-wide</h3>
+<pre class="cli" data-label="shell"><span class="pmpt">$ </span>go install github.com/flaticols/gitmd/cmd/gitmd@latest</pre>
+
+        <h3>Go tool, project-pinned</h3>
+<pre class="cli" data-label="shell"><span class="cmt"># Go 1.24+, version recorded in go.mod</span>
+<span class="pmpt">$ </span>go get -tool github.com/flaticols/gitmd/cmd/gitmd@latest
+<span class="pmpt">$ </span>go tool gitmd show</pre>
+
+        <h3>Nix, macOS</h3>
+<pre class="cli" data-label="nix"><span class="pmpt">$ </span>nix-env -if https://github.com/flaticols/gitmd/raw/latest/nix/gitmd.nix</pre>
+
+        <div class="alert" role="note" aria-labelledby="nix-note">
+          <span class="glyph" aria-hidden="true">¶</span>
+          <div>
+            <h4 id="nix-note">Note on platforms</h4>
+            <p>The release pipeline currently ships <code>aarch64-darwin</code> and <code>x86_64-darwin</code>. Linux users build from source.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="quickstart" aria-labelledby="quick-h">
+        <h2 id="quick-h">Quickstart</h2>
+        <p>
+          Every <code>gitmd</code> verb takes an optional <code>&lt;ref&gt;</code> — anything
+          <code>git rev-parse</code> accepts. Omit it and you operate on
+          <code>HEAD</code>, which is what you want most of the time.
+        </p>
+
+<pre class="cli" data-label="recipes"><span class="cmt"># attach reasoning + ticket to the commit you just made</span>
+<span class="pmpt">$ </span>gitmd add --reason <span class="str">"required for audit"</span> --ticket <span class="str">JIRA-1234</span>
+
+<span class="cmt"># replace, don't append</span>
+<span class="pmpt">$ </span>gitmd set --ticket <span class="str">JIRA-2</span>
+
+<span class="cmt"># pretty-print, or hand to jq</span>
+<span class="pmpt">$ </span>gitmd show
+<span class="pmpt">$ </span>gitmd show HEAD~3 --json
+
+<span class="cmt"># reach back two commits, attach an arbitrary trailer</span>
+<span class="pmpt">$ </span>gitmd add HEAD~2 --trailer <span class="str">"Reviewed-by=Alice &lt;a@x&gt;"</span></pre>
+
+        <p class="pull" role="doc-pullquote">
+          The <em>why</em> belongs on the commit, not in a wiki that will rot.
+        </p>
+      </section>
+
+      <section id="commands" aria-labelledby="cmd-h">
+        <h2 id="cmd-h">Commands</h2>
+        <p>
+          Five verbs. Three of them rewrite history and refuse to do so on a dirty
+          tree; the other two are pure reads.
+        </p>
+
+        <div class="cmdtable" role="table" aria-label="gitmd commands">
+          <div class="row head" role="row">
+            <span class="cell k" role="columnheader">command</span>
+            <span class="cell" role="columnheader">behaviour</span>
+          </div>
+          <div class="row" role="row">
+            <span class="cell k" role="cell">add [&lt;ref&gt;]</span>
+            <span class="cell" role="cell">Append trailers. Idempotent — skips identical neighbours.</span>
+          </div>
+          <div class="row" role="row">
+            <span class="cell k" role="cell">set [&lt;ref&gt;]</span>
+            <span class="cell" role="cell">Replace trailers that share the same key.</span>
+          </div>
+          <div class="row" role="row">
+            <span class="cell k" role="cell">del [&lt;ref&gt;]</span>
+            <span class="cell" role="cell">Remove trailers by key.</span>
+          </div>
+          <div class="row" role="row">
+            <span class="cell k" role="cell">show [&lt;ref&gt;]</span>
+            <span class="cell" role="cell">Pretty-print trailers; <code>--json</code> for machines.</span>
+          </div>
+          <div class="row" role="row">
+            <span class="cell k" role="cell">version</span>
+            <span class="cell" role="cell">Print gitmd + detected git version.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="keys" aria-labelledby="keys-h">
+        <h2 id="keys-h">Trailer keys</h2>
+        <p>
+          Three predefined shortcuts cover the cases worth standardising.
+          Anything else lives behind <code>--trailer KEY=VALUE</code>, which is
+          repeatable.
+        </p>
+
+        <div class="keys">
+          <ul>
+            <li class="keycard">
+              <span class="tag" aria-hidden="true">flag · --reason</span>
+              <h3>Reason</h3>
+              <p>The motivation. Why this diff exists — the constraint, the bug, the user request. One sentence is enough.</p>
+            </li>
+            <li class="keycard">
+              <span class="tag" aria-hidden="true">flag · --ticket</span>
+              <h3>Ticket</h3>
+              <p>An issue or PR identifier. <code>JIRA-1234</code>, <code>gh-42</code>, anything machine-readable.</p>
+            </li>
+            <li class="keycard">
+              <span class="tag" aria-hidden="true">flag · --assisted</span>
+              <h3>Assisted</h3>
+              <p>For AI-assisted commits. The model name and version: <code>Claude Code 4.7</code>.</p>
+            </li>
+            <li class="keycard">
+              <span class="tag" aria-hidden="true">flag · --trailer</span>
+              <h3>Idea / arbitrary</h3>
+              <p>Design notes, paths-not-taken, follow-ups. Or any custom key — <code>Reviewed-by</code>, <code>Tested-by</code>, etc.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="mechanics" aria-labelledby="mech-h">
+        <h2 id="mech-h">Mechanics</h2>
+        <p>
+          For <code>HEAD</code>, gitmd shells out to <code>git commit --amend</code>.
+          For any other reachable commit, it runs an interactive rebase with
+          itself registered as <code>GIT_SEQUENCE_EDITOR</code> — the editor
+          inserts a surgical <code>exec git commit --amend -F &lt;newmsg&gt;</code>
+          after the target's <code>pick</code> line.
+        </p>
+        <p>
+          Trailer composition is delegated to <code>git interpret-trailers</code>,
+          so gitmd inherits git's exact semantics — folded values, the
+          <code>---</code> divider, and the <em>twenty-five percent</em> trailer-line
+          tolerance.
+        </p>
+        <p class="ornament" aria-hidden="true">❦ ❦ ❦</p>
+      </section>
+
+      <section id="safety" aria-labelledby="safe-h">
+        <h2 id="safe-h">Safety rails</h2>
+        <p>
+          History rewriting is the kind of thing that should never surprise you.
+          gitmd is conservative on purpose.
+        </p>
+
+        <div class="alert" role="note" aria-labelledby="safe-1">
+          <span class="glyph" aria-hidden="true">!</span>
+          <div>
+            <h4 id="safe-1">Refuses dirty trees</h4>
+            <p>If <code>git status</code> has anything pending, gitmd bails out before touching history. Stash or commit first.</p>
+          </div>
+        </div>
+
+        <div class="alert" role="note" aria-labelledby="safe-2">
+          <span class="glyph" aria-hidden="true">!</span>
+          <div>
+            <h4 id="safe-2">Won't amend non-HEAD merges</h4>
+            <p>Rewriting a merge commit's message via interactive rebase is a footgun. gitmd refuses; do it by hand if you must.</p>
+          </div>
+        </div>
+
+        <div class="alert" role="note" aria-labelledby="safe-3">
+          <span class="glyph" aria-hidden="true">!</span>
+          <div>
+            <h4 id="safe-3">Never force-pushes</h4>
+            <p>If the rewritten commit was already published, you run <code>git push --force-with-lease</code> yourself — gitmd does not.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="colophon" aria-labelledby="col-h">
+        <h2 id="col-h">Colophon</h2>
+        <p>
+          Set in <em>Fraunces</em> for display, <em>EB&nbsp;Garamond</em> for body, and
+          <em>IBM Plex Mono</em> for the machinery. Composed in modern CSS:
+          cascade <code>@layer</code>s, <code>@scope</code> for content,
+          container queries on the trailer-key index, <code>subgrid</code> for the
+          command table, <code>light-dark()</code> for theming, and the
+          <code>text-box</code> + <code>text-wrap</code> properties for tighter
+          metal-type-feeling composition.
+        </p>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="pressmark" role="contentinfo">
+    <span>Printed digitally · Set in Fraunces &amp; EB Garamond · MIT licensed</span>
+    <span aria-label="Issue number">№ 01 / IV·26</span>
+  </footer>
+
+</div>
+
+<script>
+  // tiny scroll-spy for TOC aria-current
+  (function () {
+    const links = document.querySelectorAll('.toc a[href^="#"]');
+    const map = new Map();
+    links.forEach(a => {
+      const id = a.getAttribute('href').slice(1);
+      const sec = document.getElementById(id);
+      if (sec) map.set(sec, a);
+    });
+    if (!('IntersectionObserver' in window) || map.size === 0) return;
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.setAttribute('aria-current', 'false'));
+          map.get(e.target)?.setAttribute('aria-current', 'true');
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+
+    map.forEach((_, sec) => io.observe(sec));
+  })();
+</script>
+
+</body>
+</html>
