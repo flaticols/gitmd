@@ -47,7 +47,7 @@ nix:
     homepage: "https://github.com/flaticols/gitmd"
     description: "Manage git commit trailers (Reason, Ticket, Assisted, …) for git 2.54+"
     license: "mit"
-    directory: nix
+    path: nix/gitmd.nix
 
 release:
   github:
