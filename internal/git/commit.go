@@ -77,8 +77,7 @@ func IsAncestorOfHEAD(ctx context.Context, sha string) (bool, error) {
 	if err == nil {
 		return true, nil
 	}
-	var ge *Error
-	if errors.As(err, &ge) && ge.ExitCode() == 1 {
+	if ge, ok := errors.AsType[*Error](err); ok && ge.ExitCode() == 1 {
 		return false, nil
 	}
 	return false, err

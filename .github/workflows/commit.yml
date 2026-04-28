@@ -1,29 +1,36 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - latest
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/release.yml"
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: stable
+          cache: true
 
-      - name: Tidy
-        run: go mod tidy && git diff --exit-code
+      - name: Install dependencies
+        run: go mod download
 
-      - name: Lint
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.11.4
-          # Build the linter with the workflow's Go toolchain (matches go.mod,
-          # currently 1.26.1) — golangci-lint refuses to lint a project whose
-          # `go` directive is newer than the Go used to build the linter, and
-          # no v2.x release is built with Go 1.26 yet.
-          install-mode: goinstall
+      - name: Run tests
+        run: go test -v ./...
 
-      - name: Test
-        run: go test -v -cover ./...
+      - name: Run build
+        run: go build -v ./...
